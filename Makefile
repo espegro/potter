@@ -6,7 +6,7 @@ GOGET=$(GOCMD) get
 
 all:clean potter
 
-timespotter:
+potter:
 	$(GOBUILD) potter.go 
 
 clean:
