@@ -34,7 +34,6 @@ potter -p 9000 -s "OpenSSH_8.9" -k ./potter.key -m "Go away" -i mysensor
 ```
 
 Make a local ssh host key:
-ssh-keygen -f ./host.key -N ''
 ```
 $ ssh-keygen -f ./potter.key -N '' -t ed25519
 ```
@@ -60,3 +59,6 @@ Public keys will also be logged.
 ```json
 {"timestamp": "2022-07-07T18:59:01+02:00", "id": "ssh-pott", "user": "espegro", "clientip": "192.168.1.144", "srcport": "36478", "publickey": "sk-ssh-ed25519@openssh.com AAAAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX=", "clientversion": "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3" }
 ```
+
+It is also posible to change the crypto alg. to match a spesific server. They have to be supported in Go ssh lib.
+
