@@ -15,7 +15,7 @@ Usage:
   -kex string
     	Custom kex algs. (default "curve25519-sha256@libssh.org")
   -l string
-    	listen address (default "127.0.0.1")
+    	listen address (default "0.0.0.0")
   -m string
     	Custom deny message (default "Access denied.")
   -mac string
