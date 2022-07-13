@@ -63,7 +63,7 @@ func main() {
 	// Get commandline options
 	ssh_port := flag.String("p", "2222", "ssh port")
 	ssh_string := flag.String("s", "OpenSSH_4.5", "ssh versionstring")
-	ssh_ip := flag.String("l", "127.0.0.1", "listen address")
+	ssh_ip := flag.String("l", "0.0.0.0", "listen address")
 	ssh_hostkey := flag.String("k", "potter.key", "hostkey filename")
 	denymsg := flag.String("m", "Access denied.", "Custom deny message")
 	pottid = flag.String("i", "ssh-pott", "custom tag in JSON")
