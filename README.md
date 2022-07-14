@@ -38,6 +38,12 @@ Make a local ssh host key:
 $ ssh-keygen -f ./potter.key -N '' -t ed25519
 ```
 
+Or use the makefile
+
+```
+$ make key
+```
+
 Start the server listening on port 2000, ip 192.168.1.100, emulating Ubuntu 22.04, log to potter.json:
 
 ```
