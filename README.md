@@ -1,4 +1,7 @@
 # potter
+
+![potter](potter.jpg)
+
 A simple SSH-honeypot written in Go
 
 
