@@ -1,8 +1,10 @@
 # potter
 
+## A simple SSH-honeypot written in Go
+
 ![potter](potter.jpeg)
 
-A simple SSH-honeypot written in Go
+
 
 
 ```
