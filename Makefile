@@ -4,13 +4,14 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 
-all:clean potter key
+all: clean potter key
 
 potter:
-	$(GOBUILD) potter.go 
+	$(GOBUILD) -o potter potter.go
 
 clean:
 	$(GOCLEAN)
+
 key:
-	@ssh-keygen -N '' -t ed25519 -f potter.key
+	@test -f potter.key || ssh-keygen -N '' -t ed25519 -f potter.key
 
