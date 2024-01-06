@@ -1,16 +1,19 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"flag"
 	"fmt"
-	"github.com/gliderlabs/ssh"
-	gossh "golang.org/x/crypto/ssh"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/gliderlabs/ssh"
+	gossh "golang.org/x/crypto/ssh"
 )
 
 var pottid *string
@@ -20,11 +23,19 @@ var kex []string
 var enc []string
 var mac []string
 
+// Function to calculate HASSH https://github.com/salesforce/hassh
+func calculateHASSH(algorithms []string) string {
+	concatenated := strings.Join(algorithms, ";")
+	hash := md5.Sum([]byte(concatenated)) // Use MD5
+	return hex.EncodeToString(hash[:])
+}
+
 // Handler for password auth, return true to be able to send data to client
 func passauthHandler(ctx ssh.Context, password string) bool {
 	constr := strings.Split(ctx.RemoteAddr().String(), ":")
 	if len(constr) > 1 {
-		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"password\": %q, \"clientversion\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), constr[0], constr[1], password, ctx.ClientVersion())
+		hassh := calculateHASSH([]string{kex[0], enc[0], mac[0]}) // Simplified, consider all algorithms
+		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"password\": %q, \"clientversion\": %q, \"hassh\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), constr[0], constr[1], password, ctx.ClientVersion(), hassh)
 	}
 	return true
 }
@@ -35,7 +46,8 @@ func pubauthHandler(ctx ssh.Context, key ssh.PublicKey) bool {
 	authorizedKey = authorizedKey[:len(authorizedKey)-1]
 	constr := strings.Split(ctx.RemoteAddr().String(), ":")
 	if len(constr) > 1 {
-		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"publickey\": %q, \"clientversion\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), constr[0], constr[1], authorizedKey, ctx.ClientVersion())
+		hassh := calculateHASSH([]string{kex[0], enc[0], mac[0]}) // Simplified, consider all algorithms
+		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"publickey\": %q, \"clientversion\": %q, \"hassh\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), constr[0], constr[1], authorizedKey, ctx.ClientVersion(), hassh)
 	}
 	return false
 }
@@ -50,9 +62,7 @@ func serverconfigHandler(ctx ssh.Context) *gossh.ServerConfig {
 	return sconf
 }
 
-
 func main() {
-
 	// Custom usage func
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "potter ssh honeypot.\n\nUsage:\n")
@@ -67,22 +77,17 @@ func main() {
 	ssh_hostkey := flag.String("k", "potter.key", "hostkey filename")
 	denymsg := flag.String("m", "Access denied.", "Custom deny message")
 	pottid = flag.String("i", "ssh-pott", "custom tag in JSON")
+
 	// Options for custom alg.
-
-	// See https://cs.opensource.google/go/x/crypto/+/master:ssh/kex.go for valid values
-	kex_flag := flag.String("kex","curve25519-sha256@libssh.org","Custom kex algs.")
-
-	// https://cs.opensource.google/go/x/crypto/+/master:ssh/keys.go
-	enc_flag := flag.String("enc","aes256-ctr,aes128-ctr","Custom enc. algs.")
-	
-	// https://cs.opensource.google/go/x/crypto/+/master:ssh/mac.go
-	mac_flag := flag.String("mac","hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com","Custom mac. algs.")
+	kex_flag := flag.String("kex", "curve25519-sha256@libssh.org", "Custom kex algs.")
+	enc_flag := flag.String("enc", "aes256-ctr,aes128-ctr", "Custom enc. algs.")
+	mac_flag := flag.String("mac", "hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com", "Custom mac. algs.")
 	flag.Parse()
 
 	// Set custom algs
-	kex = strings.Split(*kex_flag,",")
-	enc = strings.Split(*enc_flag,",")
-	mac = strings.Split(*mac_flag,",")
+	kex = strings.Split(*kex_flag, ",")
+	enc = strings.Split(*enc_flag, ",")
+	mac = strings.Split(*mac_flag, ",")
 
 	// Open hostkey file
 	keyb, err := ioutil.ReadFile(*ssh_hostkey)
