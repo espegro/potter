@@ -72,4 +72,5 @@ Public keys will also be logged.
 ```
 
 It is also posible to change the crypto alg. to match a spesific server. They have to be supported in Go ssh lib.
+HASSH for the client is also logged.
 
