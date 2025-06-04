@@ -1,0 +1,31 @@
+# Binaries built from source
+potter
+potter_pi3
+
+# Host keys generated during build
+potter.key
+potter.key.pub
+
+# General build artifacts
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.*
+*.coverprofile
+profile.cov
+
+# Build output directories
+bin/
+build/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Editor directories and temporary files
+.idea/
+.vscode/
+*.swp
