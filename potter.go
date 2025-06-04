@@ -102,7 +102,7 @@ func main() {
 
 	// SSH server config
 	s := &ssh.Server{
-		Addr:                 *ssh_ip + ":" + *ssh_port,
+		Addr:                 net.JoinHostPort(*ssh_ip, *ssh_port),
 		Version:              *ssh_string,
 		IdleTimeout:          time.Duration(10 * time.Second),
 		MaxTimeout:           time.Duration(15 * time.Second),
