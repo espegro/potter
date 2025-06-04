@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -91,7 +90,7 @@ func main() {
 	mac = strings.Split(*mac_flag, ",")
 
 	// Open hostkey file
-	keyb, err := ioutil.ReadFile(*ssh_hostkey)
+	keyb, err := os.ReadFile(*ssh_hostkey)
 	if err != nil {
 		log.Fatalf("Failed to open hostkey: %s.", *ssh_hostkey)
 	}
