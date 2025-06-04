@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -32,10 +33,10 @@ func calculateHASSH(algorithms []string) string {
 
 // Handler for password auth, return true to be able to send data to client
 func passauthHandler(ctx ssh.Context, password string) bool {
-	constr := strings.Split(ctx.RemoteAddr().String(), ":")
-	if len(constr) > 1 {
+	host, port, err := net.SplitHostPort(ctx.RemoteAddr().String())
+	if err == nil {
 		hassh := calculateHASSH([]string{kex[0], enc[0], mac[0]}) // Simplified, consider all algorithms
-		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"password\": %q, \"clientversion\": %q, \"hassh\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), constr[0], constr[1], password, ctx.ClientVersion(), hassh)
+		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"password\": %q, \"clientversion\": %q, \"hassh\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), host, port, password, ctx.ClientVersion(), hassh)
 	}
 	return true
 }
@@ -44,10 +45,10 @@ func passauthHandler(ctx ssh.Context, password string) bool {
 func pubauthHandler(ctx ssh.Context, key ssh.PublicKey) bool {
 	authorizedKey := gossh.MarshalAuthorizedKey(key)
 	authorizedKey = authorizedKey[:len(authorizedKey)-1]
-	constr := strings.Split(ctx.RemoteAddr().String(), ":")
-	if len(constr) > 1 {
+	host, port, err := net.SplitHostPort(ctx.RemoteAddr().String())
+	if err == nil {
 		hassh := calculateHASSH([]string{kex[0], enc[0], mac[0]}) // Simplified, consider all algorithms
-		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"publickey\": %q, \"clientversion\": %q, \"hassh\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), constr[0], constr[1], authorizedKey, ctx.ClientVersion(), hassh)
+		fmt.Printf("{\"timestamp\": %q, \"id\": %q, \"user\": %q, \"clientip\": %q, \"srcport\": %q, \"publickey\": %q, \"clientversion\": %q, \"hassh\": %q }\n", time.Now().Format(time.RFC3339), *pottid, ctx.User(), host, port, authorizedKey, ctx.ClientVersion(), hassh)
 	}
 	return false
 }
